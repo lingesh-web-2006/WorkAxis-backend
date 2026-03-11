@@ -1,0 +1,112 @@
+﻿curl.exe : * Host 
+localhost:8080 was resolved.
+At line:1 char:1
++ curl.exe -X OPTIONS -v -H 
+"Origin: 
+http://localhost:3002" -H 
+"Access- ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: (* Host   
+  localhost:8080 was resol   
+ ved.:String) [], RemoteE    
+xception
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+* IPv6: ::1
+* IPv4: 127.0.0.1
+  % Total    % Received % 
+Xferd  Average Speed   Time  
+  Time     Time  Current
+                             
+    Dload  Upload   Total   
+Spent    Left  Speed
+
+  0     0    0     0    0    
+ 0      0      0 --:--:-- 
+--:--:-- --:--:--     0*   
+Trying [::1]:8080...
+
+  0     0    0     0    0    
+ 0      0      0 --:--:-- 
+--:--:-- --:--:--     0* 
+Established connection to 
+localhost (::1 port 8080) 
+from ::1 port 59094 
+* using HTTP/1.x
+> OPTIONS /api/auth/login 
+HTTP/1.1
+
+> Host: localhost:8080
+
+> User-Agent: curl/8.16.0
+
+> Accept: */*
+
+> Origin: 
+http://localhost:3002
+
+> Access-Control-Request-Meth
+od: POST
+
+> Access-Control-Request-Head
+ers: Content-Type
+
+> 
+
+* Request completely sent off
+< HTTP/1.1 200 
+
+< Vary: Origin
+
+< Vary: 
+Access-Control-Request-Method
+
+< Vary: Access-Control-Reques
+t-Headers
+
+< 
+Access-Control-Allow-Origin: 
+http://localhost:3002
+
+< Access-Control-Allow-Method
+s: 
+GET,POST,PUT,DELETE,OPTIONS
+
+< Access-Control-Allow-Header
+s: Content-Type
+
+< Access-Control-Allow-Creden
+tials: true
+
+< X-Content-Type-Options: 
+nosniff
+
+< X-XSS-Protection: 0
+
+< Cache-Control: no-cache, 
+no-store, max-age=0, 
+must-revalidate
+
+< Pragma: no-cache
+
+< Expires: 0
+
+< X-Frame-Options: DENY
+
+< Content-Length: 0
+
+< Date: Wed, 11 Mar 2026 
+07:47:12 GMT
+
+< 
+
+
+  0     0    0     0    0    
+ 0      0      0 --:--:-- 
+--:--:-- --:--:--     0
+* Connection #0 to host 
+localhost:8080 left intact
