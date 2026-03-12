@@ -28,8 +28,8 @@ import java.util.*;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-```
-@Autowired
+
+    @Autowired
 private UserDetailsServiceImpl userDetailsService;
 
 @Value("${app.cors.allowed-origins}")
@@ -109,6 +109,5 @@ public CorsConfigurationSource corsConfigurationSource() {
 
     return source;
 }
-```
 
 }

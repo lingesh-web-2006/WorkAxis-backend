@@ -38,7 +38,7 @@ public class LeaveController {
     }
 
     @PutMapping("/{id}/process")
-    @PreAuthorize("hasAnyRole('ADMIN', 'HR')")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<LeaveResponse> processLeave(@PathVariable("id") Long id, @RequestBody LeaveActionDTO action) {
         return ResponseEntity.ok(leaveService.processLeave(id, action));
     }
