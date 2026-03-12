@@ -28,7 +28,7 @@ import java.util.*;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-
+```
 @Autowired
 private UserDetailsServiceImpl userDetailsService;
 
@@ -70,7 +70,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             .requestMatchers("/", "/api", "/api/auth/**").permitAll()
             .requestMatchers("/favicon.ico", "/favicon.png", "/*.ico", "/*.png").permitAll()
 
-            // Role-based APIs
+            // Role-based URLs
             .requestMatchers("/api/admin/**").hasRole("ADMIN")
             .requestMatchers("/api/employees", "/api/employees/**").hasAnyRole("ADMIN", "HR")
             .requestMatchers("/api/payroll", "/api/payroll/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
@@ -78,7 +78,7 @@ public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
             .requestMatchers("/api/company", "/api/company/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
             .requestMatchers("/api/dashboard", "/api/dashboard/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
 
-            // All other requests require authentication
+            // All other requests need authentication
             .anyRequest().authenticated()
         );
 
@@ -109,6 +109,6 @@ public CorsConfigurationSource corsConfigurationSource() {
 
     return source;
 }
-
+```
 
 }
