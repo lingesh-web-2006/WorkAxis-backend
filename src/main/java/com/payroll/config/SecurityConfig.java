@@ -16,92 +16,99 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.access.channel.ChannelProcessingFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
-import java.util.*;
 
+import java.util.*;
 
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private UserDetailsServiceImpl userDetailsService;
 
-    @Value("${app.cors.allowed-origins}")
-    private String allowedOrigins;
+@Autowired
+private UserDetailsServiceImpl userDetailsService;
 
-    @Bean
-    public AuthTokenFilter authenticationJwtTokenFilter() {
-        return new AuthTokenFilter();
+@Value("${app.cors.allowed-origins}")
+private String allowedOrigins;
+
+@Bean
+public AuthTokenFilter authenticationJwtTokenFilter() {
+    return new AuthTokenFilter();
+}
+
+@Bean
+public DaoAuthenticationProvider authenticationProvider() {
+    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+    authProvider.setUserDetailsService(userDetailsService);
+    authProvider.setPasswordEncoder(passwordEncoder());
+    return authProvider;
+}
+
+@Bean
+public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+    return authConfig.getAuthenticationManager();
+}
+
+@Bean
+public PasswordEncoder passwordEncoder() {
+    return new BCryptPasswordEncoder();
+}
+
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
+    http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .csrf(csrf -> csrf.disable())
+        .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .authorizeHttpRequests(auth -> auth
+
+            // Public URLs
+            .requestMatchers("/", "/api", "/api/auth/**").permitAll()
+            .requestMatchers("/favicon.ico", "/favicon.png", "/*.ico", "/*.png").permitAll()
+
+            // Role-based APIs
+            .requestMatchers("/api/admin/**").hasRole("ADMIN")
+            .requestMatchers("/api/employees", "/api/employees/**").hasAnyRole("ADMIN", "HR")
+            .requestMatchers("/api/payroll", "/api/payroll/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
+            .requestMatchers("/api/announcements", "/api/announcements/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
+            .requestMatchers("/api/company", "/api/company/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
+            .requestMatchers("/api/dashboard", "/api/dashboard/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
+
+            // All other requests require authentication
+            .anyRequest().authenticated()
+        );
+
+    http.authenticationProvider(authenticationProvider());
+    http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
+    return http.build();
+}
+
+@Bean
+public CorsConfigurationSource corsConfigurationSource() {
+
+    CorsConfiguration configuration = new CorsConfiguration();
+
+    if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
+        configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
+    } else {
+        configuration.setAllowedOrigins(Collections.singletonList("*"));
     }
 
-    @Bean
-    public DaoAuthenticationProvider authenticationProvider() {
-        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-        authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder());
-        return authProvider;
-    }
+    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
+    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "x-auth-token"));
+    configuration.setExposedHeaders(Collections.singletonList("x-auth-token"));
+    configuration.setAllowCredentials(true);
 
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-        return authConfig.getAuthenticationManager();
-    }
+    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+    source.registerCorsConfiguration("/**", configuration);
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+    return source;
+}
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
-            .csrf(csrf -> csrf.disable())
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authorizeHttpRequests(auth -> auth
-                // Public URLs
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/favicon.ico", "/favicon.png", "/*.ico", "/*.png").permitAll()
-                
-                // Role-based URLs
-                .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                .requestMatchers("/api/employees", "/api/employees/**").hasAnyRole("ADMIN", "HR")
-                .requestMatchers("/api/payroll", "/api/payroll/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
-                .requestMatchers("/api/announcements", "/api/announcements/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
-                .requestMatchers("/api/company", "/api/company/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
-                .requestMatchers("/api/dashboard", "/api/dashboard/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
-                
-                // All other URLs require authentication
-                .anyRequest().authenticated()
-            );
 
-        http.authenticationProvider(authenticationProvider());
-        http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-
-        return http.build();
-    }
-
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        if (allowedOrigins != null && !allowedOrigins.isEmpty()) {
-            configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
-        } else {
-            configuration.setAllowedOrigins(Collections.singletonList("*"));
-        }
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "x-auth-token"));
-        configuration.setExposedHeaders(Collections.singletonList("x-auth-token"));
-        configuration.setAllowCredentials(true);
-        
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
 }
