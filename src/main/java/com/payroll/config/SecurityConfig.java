@@ -1,12 +1,4 @@
- 
-👉 Java file la **``` allowed illa**
-
----
-
-## ✅ FINAL CLEAN CODE (copy this fully)
-
-:::writing{variant="standard" id="84721"}
-package com.payroll.config;
+ package com.payroll.config;
 
 import com.payroll.security.AuthTokenFilter;
 import com.payroll.security.UserDetailsServiceImpl;
@@ -113,17 +105,3 @@ public class SecurityConfig {
         return source;
     }
 }
-:::
-
----
-
-## 🧠 Simple explanation
-👉 ``` = Markdown code symbol  
-👉 Java = strict → accept pannadhu ❌  
-
----
-
-## ⚠️ Final step
-Run again:
-```bash
-mvn clean install
