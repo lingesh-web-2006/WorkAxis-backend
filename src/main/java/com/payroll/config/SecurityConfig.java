@@ -17,9 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.cors.*;
 
 import java.util.*;
 
@@ -28,11 +26,11 @@ import java.util.*;
 @EnableMethodSecurity
 public class SecurityConfig {
 
-
-    @Autowired
+```
+@Autowired
 private UserDetailsServiceImpl userDetailsService;
 
-@Value("${app.cors.allowed-origins}")
+@Value("${app.cors.allowed-origins:*}")
 private String allowedOrigins;
 
 @Bean
@@ -61,24 +59,25 @@ public PasswordEncoder passwordEncoder() {
 @Bean
 public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-    http.cors(cors -> cors.configurationSource(corsConfigurationSource()))
+    http
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
         .csrf(csrf -> csrf.disable())
         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
         .authorizeHttpRequests(auth -> auth
 
-            // Public URLs
+            // Public APIs
             .requestMatchers("/", "/api", "/api/auth/**").permitAll()
             .requestMatchers("/favicon.ico", "/favicon.png", "/*.ico", "/*.png").permitAll()
 
-            // Role-based URLs
+            // Role-based access
             .requestMatchers("/api/admin/**").hasRole("ADMIN")
-            .requestMatchers("/api/employees", "/api/employees/**").hasAnyRole("ADMIN", "HR")
-            .requestMatchers("/api/payroll", "/api/payroll/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
-            .requestMatchers("/api/announcements", "/api/announcements/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
-            .requestMatchers("/api/company", "/api/company/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
-            .requestMatchers("/api/dashboard", "/api/dashboard/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
+            .requestMatchers("/api/employees/**").hasAnyRole("ADMIN", "HR")
+            .requestMatchers("/api/payroll/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
+            .requestMatchers("/api/announcements/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
+            .requestMatchers("/api/company/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
+            .requestMatchers("/api/dashboard/**").hasAnyRole("ADMIN", "HR", "EMPLOYEE")
 
-            // All other requests need authentication
+            // Any other request → authentication required
             .anyRequest().authenticated()
         );
 
@@ -109,5 +108,6 @@ public CorsConfigurationSource corsConfigurationSource() {
 
     return source;
 }
+```
 
 }
